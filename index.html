@@ -69,6 +69,91 @@
     color: #fff;
   }
   .logo span { font-weight: 500; color: #cfd3e6; }
+
+  /* ============================================================
+     HIDDEN NAV MENU + TOGGLE ARROW BUTTON
+     ============================================================ */
+  .nav-toggle {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    color: #ffffff;
+    font-size: 1.1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.35s ease;
+    backdrop-filter: blur(10px);
+    line-height: 1;
+    padding: 0;
+    flex-shrink: 0;
+  }
+
+    /* ============================================================
+     MOBILE: Pin the toggle button to the top-right corner
+     ============================================================ */
+  @media (max-width: 700px) {
+    .navbar {
+      position: sticky;
+      padding-right: 4.5rem; /* make room for the corner button */
+    }
+
+    .nav-toggle {
+      position: absolute;
+      top: 1.2rem;
+      right: 1.2rem;
+      z-index: 5;
+    }
+  }
+  .nav-toggle:hover {
+    background: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 255, 255, 0.55);
+    transform: scale(1.06);
+    box-shadow: 0 4px 20px rgba(255, 255, 255, 0.15);
+  }
+  .nav-toggle:active { transform: scale(0.94); }
+
+  /* The arrow icon rotates smoothly */
+  .nav-toggle .arrow-icon {
+    display: inline-block;
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+    transform: rotate(0deg);      /* default: points down */
+  }
+  .nav-toggle.open .arrow-icon {
+    transform: rotate(180deg);    /* open: points up */
+  }
+
+  /* Collapsible nav panel */
+  .nav-panel {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    flex-wrap: wrap;
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transform: translateY(-8px);
+    transition:
+      max-height 0.4s ease,
+      opacity 0.3s ease,
+      transform 0.35s ease,
+      margin 0.35s ease;
+    margin-top: 0;
+    width: 100%;
+    justify-content: flex-end;
+  }
+
+  /* When open */
+  .nav-panel.open {
+    max-height: 200px;
+    opacity: 1;
+    transform: translateY(0);
+    margin-top: 1rem;
+  }
+
   .nav-links { display: flex; gap: 2rem; flex-wrap: wrap; list-style: none; }
   .nav-links a {
     font-size: 0.95rem;
@@ -94,14 +179,12 @@
     cursor: pointer;
     transition: all 0.2s ease;
     letter-spacing: 0.5px;
-    margin-left: 1rem;
   }
   .legal-btn:hover { background: #fff; color: #000; }
   .legal-btn:active { transform: scale(0.94); }
 
   /* ============================================================
      SEMI-TRANSPARENT FROSTED CARDS
-     Stars faintly visible through the glass
      ============================================================ */
   .container,
   .about-section,
@@ -475,9 +558,9 @@
     box-shadow: 0 40px 80px -20px rgba(0,0,0,0.95);
   }
   .card.left-1 { transform: translateX(-320px) scale(0.68) rotateY(18deg); opacity: 0.55; z-index: 3; filter: blur(3px); }
-.card.right-1 { transform: translateX(320px) scale(0.68) rotateY(-18deg); opacity: 0.55; z-index: 3; filter: blur(3px); }
-.card.left-2 { transform: translateX(-540px) scale(0.5) rotateY(28deg); opacity: 0.25; z-index: 1; filter: blur(6px); }
-.card.right-2 { transform: translateX(540px) scale(0.5) rotateY(-28deg); opacity: 0.25; z-index: 1; filter: blur(6px); }
+  .card.right-1 { transform: translateX(320px) scale(0.68) rotateY(-18deg); opacity: 0.55; z-index: 3; filter: blur(3px); }
+  .card.left-2 { transform: translateX(-540px) scale(0.5) rotateY(28deg); opacity: 0.25; z-index: 1; filter: blur(6px); }
+  .card.right-2 { transform: translateX(540px) scale(0.5) rotateY(-28deg); opacity: 0.25; z-index: 1; filter: blur(6px); }
   .card.hidden-far { transform: translateX(0) scale(0.5); opacity: 0; z-index: 0; pointer-events: none; }
 
   .card[data-slide="0"] { background: linear-gradient(155deg, #1e1e2f  0%, #f5e0c0 100%); color: #fcfcfb; }
@@ -655,8 +738,8 @@
 
   @media (max-width: 700px) {
     .navbar { flex-direction: column; align-items: flex-start; gap: 0.8rem; padding: 1.2rem 1.5rem; }
+    .nav-panel { justify-content: flex-start; }
     .nav-links { gap: 1.2rem; width: 100%; }
-    .legal-btn { margin-left: 0; margin-top: 0.5rem; }
     .container, .about-section, .contact-section { padding: 1.8rem 1.2rem; margin: 1.5rem 1rem; }
     h1 { font-size: 2.2rem; }
     .btn-group { flex-direction: column; align-items: center; }
@@ -684,7 +767,12 @@
 <!-- NAVIGATION -->
 <nav class="navbar">
   <div class="logo">The Artistic <span>Unity</span></div>
-  <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+
+  <button class="nav-toggle" id="navToggle" aria-label="Toggle navigation" aria-expanded="false">
+    <span class="arrow-icon">▼</span>
+  </button>
+
+  <div class="nav-panel" id="navPanel">
     <ul class="nav-links">
       <li><a href="#about">About</a></li>
       <li><a href="#services">Services</a></li>
@@ -887,6 +975,31 @@
 
 <!-- JAVASCRIPT -->
 <script>
+  /* ============================================
+     NAV TOGGLE — reveal / hide menu
+     ============================================ */
+  (function() {
+    const toggle = document.getElementById('navToggle');
+    const panel = document.getElementById('navPanel');
+    if (!toggle || !panel) return;
+
+    toggle.addEventListener('click', function(e) {
+      e.stopPropagation();
+      const isOpen = panel.classList.toggle('open');
+      toggle.classList.toggle('open', isOpen);
+      toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    /* Optional: close menu when a nav link inside is clicked */
+    panel.querySelectorAll('a, button').forEach(el => {
+      el.addEventListener('click', () => {
+        panel.classList.remove('open');
+        toggle.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+      });
+    });
+  })();
+
   /* ============================================
      WHITE STAR FIELD — pitch black sky only
      ============================================ */
